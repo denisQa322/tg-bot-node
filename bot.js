@@ -1,7 +1,7 @@
 const { Telegraf, Markup } = require('telegraf');
 const path = require('path');
 const fs = require('fs');
-const nodemailer = require('nodemailer');
+// const nodemailer = require('nodemailer');
 
 require('dotenv').config();
 
