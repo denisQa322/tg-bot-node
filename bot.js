@@ -6,13 +6,13 @@ const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 // Настройка SMTP-почты (пример для Gmail)
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'your-email@gmail.com',
-    pass: 'your-email-password', // Используйте OAuth2 для безопасного подключения
-  },
-});
+// const transporter = nodemailer.createTransport({
+//   service: 'gmail',
+//   auth: {
+//     user: 'your-email@gmail.com',
+//     pass: 'your-email-password', // Используйте OAuth2 для безопасного подключения
+//   },
+// });
 
 const bot = new Telegraf(process.env.BOT_API_KEY);
 
