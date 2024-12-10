@@ -263,11 +263,15 @@ bot.hears(['Вернуться в начало'], async (ctx) => {
 });
 
 // Обработчик "Остались вопросы"
-bot.hears(['Остались вопросы'], async (ctx) => {
+bot.hears(['Остались вопросы', 'Вопроса нет в предложенных'], async (ctx) => {
   try {
     ctx.reply(messages.noAnswerInfo);
   } catch (error) {
-    await handleError(ctx, error, 'Ошибка при обработке выбора "Остались вопросы"');
+    await handleError(
+      ctx,
+      error,
+      'Ошибка при обработке выбора "Остались вопросы, Вопроса нет в предложенных"',
+    );
   }
 });
 
