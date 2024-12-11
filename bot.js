@@ -18,6 +18,13 @@ function sendDataToPHP(data) {
     });
 }
 
+// Функция для загрузки файла через Telegram API
+async function downloadFile(fileId) {
+  const fileUrl = await bot.telegram.getFileLink(fileId);
+  const fileResponse = await axios.get(fileUrl.href, { responseType: 'arraybuffer' });
+  return fileResponse.data; // Возвращаем содержимое файла
+}
+
 // Объект для хранения времени последнего взаимодействия пользователей
 const userLastInteraction = {};
 
@@ -308,8 +315,42 @@ bot.hears(['Остались вопросы', 'Вопроса нет в пред
   }
 });
 
+// Обработчик сообщений
 bot.on('text', (ctx) => {
-  sendDataToPHP(ctx.update);
+  try {
+    sendDataToPHP(ctx.update);
+  } catch (error) {
+    handleError(ctx, error, 'Ошибка отправки сообщения в чат');
+  }
+});
+
+// Обработчик загрузки фото
+bot.on('photo', async (ctx) => {
+  try {
+    const photoId = ctx.message.photo[ctx.message.photo.length - 1].file_id;
+    const photoData = await downloadFile(photoId);
+
+    await axios.post(
+      'https://telegramwh.omnidesk.ru/webhooks/telegram/7037/de6bf551b7e2170e',
+      photoData,
+      {
+        headers: { 'Content-Type': 'application/octet-stream' },
+      },
+    );
+
+    sendDataToPHP();
+  } catch (error) {
+    handleError(ctx, error, 'Ошибка отправки фото в чат');
+  }
+});
+
+// Обработчик загрузки видео
+bot.on('video', async (ctx) => {
+  try {
+    sendDataToPHP();
+  } catch (error) {
+    handleError(ctx, error, 'Ошибка отправки видео в чат');
+  }
 });
 
 // Глобальный обработчик ошибок
