@@ -324,7 +324,7 @@ bot.on('photo', async (ctx) => {
     const fileUrl = await bot.telegram.getFileLink(fileId); // Получаем ссылку на файл
 
     const data = {
-      message: ctx.message.text || 'Видео отправлено',
+      message: ctx.message.text || 'Фото отправлено',
       photo_url: fileUrl.href, // Ссылка на фото
       user: ctx.from, // Информация о пользователе
     };
@@ -342,7 +342,7 @@ bot.on('video', async (ctx) => {
     const fileUrl = await bot.telegram.getFileLink(fileId); // Получаем ссылку на файл
 
     const data = {
-      message: ctx.message.text || 'Фото отправлено',
+      message: ctx.message.text || 'Видео отправлено',
       video_url: fileUrl.href, // Ссылка на видео
       user: ctx.from, // Информация о пользователе
     };
