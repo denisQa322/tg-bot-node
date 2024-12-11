@@ -337,8 +337,6 @@ bot.on('photo', async (ctx) => {
         headers: { 'Content-Type': 'application/octet-stream' },
       },
     );
-
-    sendDataToPHP();
   } catch (error) {
     handleError(ctx, error, 'Ошибка отправки фото в чат');
   }
