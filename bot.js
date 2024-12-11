@@ -1,18 +1,9 @@
 const { Telegraf, Markup } = require('telegraf');
 const path = require('path');
 const fs = require('fs');
-const nodemailer = require('nodemailer');
+const axios = require('axios');
 
 require('dotenv').config();
-
-// Настройка SMTP-почты (пример для Gmail)
-// const transporter = nodemailer.createTransport({
-//   service: 'gmail',
-//   auth: {
-//     user: 'your-email@gmail.com',
-//     pass: 'your-email-password', // Используйте OAuth2 для безопасного подключения
-//   },
-// });
 
 const bot = new Telegraf(process.env.BOT_API_KEY);
 
@@ -76,6 +67,18 @@ function logUserAction(userId, action, message) {
 
   // Записываем обновленные данные обратно в файл
   writeLogs(logs);
+}
+
+// Функция для отправки данных в PHP-скрипт
+function sendDataToPHP(data) {
+  axios
+    .post('https://telegramwh.omnidesk.ru/webhooks/telegram/7037/de6bf551b7e2170e', data)
+    .then((response) => {
+      console.log('Данные успешно отправлены в PHP:', response.data);
+    })
+    .catch((error) => {
+      console.error('Ошибка при отправке данных в PHP:', error);
+    });
 }
 
 // Объект для хранения времени последнего взаимодействия пользователей
@@ -165,8 +168,11 @@ async function handleError(ctx, error, context = 'Произошла ошибк�
 bot.start(async (ctx) => {
   try {
     const userId = ctx.from.id;
+    const message = ctx.message.text;
 
-    logUserAction(userId, 'start');
+    logUserAction(userId, 'start', message);
+
+    sendDataToPHP(ctx.update);
 
     // Проверяем, прошло ли больше 24 часов
     if (!hasOneDayPassed(userLastInteraction[userId])) {
@@ -192,8 +198,10 @@ bot.start(async (ctx) => {
 bot.hears(['Розничный клиент'], async (ctx) => {
   try {
     const userId = ctx.from.id;
+    const message = ctx.message.text;
 
-    logUserAction(userId, 'Розничный клиент');
+    logUserAction(userId, 'Розничный клиент', message);
+    sendDataToPHP(ctx.update);
 
     const retailQuestions = questionsKeyboard([
       ['Как оформить заказ?', 'Как пополнить баланс?'],

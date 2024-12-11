@@ -19,8 +19,6 @@
   "dependencies": {
     "dotenv": "^16.4.7",
     "fs": "^0.0.1-security",
-    "node-cron": "^3.0.3",
-    "nodemailer": "^6.9.16",
     "telegraf": "^4.16.3"
   }
 }
