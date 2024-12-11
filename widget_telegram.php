@@ -1,77 +1,57 @@
 <?php
 function CheckWidgetAction($data)
 {
-    if (empty($data['message'])) {
+    if(empty($data['message']['text']) && empty($data['photo_url']) && empty($data['video_url']))
+    {
         return false;
     }
 
-    // Проверка текста
-    if (!empty($data['message']['text']) && $data['message']['text'] != '/start') {
-        return sendToWebhook($data);
-    }
+    // Если есть текст сообщения
+    $text = $data['message']['text'];
 
-    // Проверка фото
-    if (!empty($data['message']['photo'])) {
-        $fileId = end($data['message']['photo'])['file_id']; // Берем самое большое фото
-        $fileUrl = getTelegramFileUrl($fileId);
-        if ($fileUrl) {
-            $data['file_url'] = $fileUrl;
-            return sendToWebhook($data);
+    // Если нет текста, но есть фото или видео
+    if (empty($text) && (isset($data['photo_url']) || isset($data['video_url']))) {
+        // Обработка фото
+        if (isset($data['photo_url'])) {
+            $mediaUrl = $data['photo_url'];
+            // Например, сохраняем ссылку на фото в файл
+            file_put_contents('photos.log', "Фото URL: $mediaUrl\n", FILE_APPEND);
         }
-    }
 
-    // Проверка видео
-    if (!empty($data['message']['video'])) {
-        $fileId = $data['message']['video']['file_id'];
-        $fileUrl = getTelegramFileUrl($fileId);
-        if ($fileUrl) {
-            $data['file_url'] = $fileUrl;
-            return sendToWebhook($data);
+        // Обработка видео
+        if (isset($data['video_url'])) {
+            $mediaUrl = $data['video_url'];
+            // Например, сохраняем ссылку на видео в файл
+            file_put_contents('videos.log', "Видео URL: $mediaUrl\n", FILE_APPEND);
         }
-    }
 
-    return false;
-}
-
-function getTelegramFileUrl($fileId)
-{
-    $telegramToken = 'YOUR_TELEGRAM_BOT_TOKEN';
-    $url = "https://api.telegram.org/bot$telegramToken/getFile?file_id=$fileId";
-
-    $response = file_get_contents($url);
-    $result = json_decode($response, true);
-
-    if (!empty($result['result']['file_path'])) {
-        $filePath = $result['result']['file_path'];
-        return "https://api.telegram.org/file/bot$telegramToken/$filePath";
-    }
-
-    return false;
-}
-
-function sendToWebhook($data)
-{
-    $ch = curl_init('https://telegramwh.omnidesk.ru/webhooks/telegram/7037/de6bf551b7e2170e');
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-
-    $result = curl_exec($ch);
-    $result = !empty($result) ? @json_decode($result, true) : null;
-
-    curl_close($ch);
-
-    if (isset($result['success']) && $result['success'] === '2') {
-        return false;
-    } elseif (!empty($result['success'])) {
         return true;
     }
 
+    // Обработка сообщения с текстом
+    if($text != '/start')
+    {
+        $ch = curl_init('https://telegramwh.omnidesk.ru/webhooks/telegram/7037/de6bf551b7e2170e');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+
+        $result = curl_exec($ch);
+        $result = !empty($result) ? @json_decode($result, TRUE) : null;
+
+        curl_close($ch);
+
+        if (isset($result['success']) && $result['success'] === '2') {
+            return false;
+        } elseif ($result['success']) {
+            return true;
+        }
+    }
     return false;
 }
 
-if (CheckWidgetAction(json_decode(file_get_contents("php://input"), true))) {
+if (CheckWidgetAction(json_decode(file_get_contents("php://input"), TRUE))) {
     die;
 }
 ?>

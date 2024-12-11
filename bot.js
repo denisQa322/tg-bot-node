@@ -6,6 +6,18 @@ require('dotenv').config();
 
 const bot = new Telegraf(process.env.BOT_API_KEY);
 
+// Функция для отправки ошибки админу
+async function sendErrorToAdmin(error) {
+  try {
+    await bot.telegram.sendMessage(
+      process.env.ADMIN_ID,
+      `❗️ Произошла ошибка в боте:\n\n${error.message}\n\n${error.stack}`,
+    );
+  } catch (err) {
+    console.error('Не удалось отправить сообщение об ошибке в Telegram:', err);
+  }
+}
+
 // Функция для отправки данных в PHP-скрипт
 function sendDataToPHP(data) {
   axios
@@ -14,15 +26,8 @@ function sendDataToPHP(data) {
       console.log('Данные успешно отправлены в PHP:', response.data);
     })
     .catch((error) => {
-      console.error('Ошибка при отправке данных в PHP:', error);
+      sendErrorToAdmin(data, error, 'Ошибка отправки на PHP');
     });
-}
-
-// Функция для загрузки файла через Telegram API
-async function downloadFile(fileId) {
-  const fileUrl = await bot.telegram.getFileLink(fileId);
-  const fileResponse = await axios.get(fileUrl.href, { responseType: 'arraybuffer' });
-  return fileResponse.data; // Возвращаем содержимое файла
 }
 
 // Объект для хранения времени последнего взаимодействия пользователей
@@ -81,18 +86,6 @@ function customerKeyboard() {
   ])
     .resize()
     .oneTime();
-}
-
-// Функция для отправки ошибки админу
-async function sendErrorToAdmin(error) {
-  try {
-    await bot.telegram.sendMessage(
-      process.env.ADMIN_ID,
-      `❗️ Произошла ошибка в боте:\n\n${error.message}\n\n${error.stack}`,
-    );
-  } catch (err) {
-    console.error('Не удалось отправить сообщение об ошибке в Telegram:', err);
-  }
 }
 
 // Функция для обработки ошибки
@@ -327,20 +320,16 @@ bot.on('text', (ctx) => {
 // Обработчик загрузки фото
 bot.on('photo', async (ctx) => {
   try {
-    const photoId = ctx.message.photo[ctx.message.photo.length - 1].file_id;
-    const photoData = await downloadFile(photoId);
+    const fileId = ctx.message.photo[ctx.message.photo.length - 1].file_id; // Получаем ID фото
+    const fileUrl = await bot.telegram.getFileLink(fileId); // Получаем ссылку на файл
 
-    const fileResponse = await axios.get(photoData.href, {
-      responseType: 'arraybuffer',
-    });
+    const data = {
+      message: ctx.message.text || 'Видео отправлено',
+      photo_url: fileUrl.href, // Ссылка на фото
+      user: ctx.from, // Информация о пользователе
+    };
 
-    await axios.post(
-      'https://telegramwh.omnidesk.ru/webhooks/telegram/7037/de6bf551b7e2170e',
-      fileResponse.data,
-      {
-        headers: { 'Content-Type': 'application/octet-stream' },
-      },
-    );
+    sendDataToPHP(data);
   } catch (error) {
     handleError(ctx, error, 'Ошибка отправки фото в чат');
   }
@@ -349,20 +338,16 @@ bot.on('photo', async (ctx) => {
 // Обработчик загрузки видео
 bot.on('video', async (ctx) => {
   try {
-    const videoId = ctx.message.video[ctx.message.video.length - 1].file_id;
-    const videoData = await downloadFile(videoId);
+    const fileId = ctx.message.video.file_id; // Получаем ID видео
+    const fileUrl = await bot.telegram.getFileLink(fileId); // Получаем ссылку на файл
 
-    const fileResponse = await axios.get(videoData.href, {
-      responseType: 'arraybuffer',
-    });
+    const data = {
+      message: ctx.message.text || 'Фото отправлено',
+      video_url: fileUrl.href, // Ссылка на видео
+      user: ctx.from, // Информация о пользователе
+    };
 
-    await axios.post(
-      'https://telegramwh.omnidesk.ru/webhooks/telegram/7037/de6bf551b7e2170e',
-      fileResponse.data,
-      {
-        headers: { 'Content-Type': 'application/octet-stream' },
-      },
-    );
+    sendDataToPHP(data);
   } catch (error) {
     handleError(ctx, error, 'Ошибка отправки видео в чат');
   }
