@@ -343,13 +343,13 @@ bot.on('photo', async (ctx) => {
 });
 
 // Обработчик загрузки видео
-bot.on('video', async (ctx) => {
-  try {
-    sendDataToPHP();
-  } catch (error) {
-    handleError(ctx, error, 'Ошибка отправки видео в чат');
-  }
-});
+// bot.on('video', async (ctx) => {
+//   try {
+//     sendDataToPHP();
+//   } catch (error) {
+//     handleError(ctx, error, 'Ошибка отправки видео в чат');
+//   }
+// });
 
 // Глобальный обработчик ошибок
 bot.catch(async (err) => {
