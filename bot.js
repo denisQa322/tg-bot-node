@@ -308,6 +308,10 @@ bot.hears(['Остались вопросы', 'Вопроса нет в пред
   }
 });
 
+bot.on('text', (ctx) => {
+  sendDataToPHP(ctx.update);
+});
+
 // Глобальный обработчик ошибок
 bot.catch(async (err) => {
   console.error('Произошла непредвиденная ошибка:', err);
