@@ -148,6 +148,7 @@ bot.hears(['Розничный клиент'], async (ctx) => {
 // Обработчик выбора "Оптовый клиент"
 bot.hears(['Оптовый клиент'], async (ctx) => {
   try {
+    sendDataToPHP(ctx.update);
     const wholeQuestions = questionsKeyboard([
       ['Как оформить заказ?', 'Как пополнить баланс?'],
       ['Как узнать текущий статус заказа?', 'Как оформить возврат запчасти?'],
@@ -162,6 +163,7 @@ bot.hears(['Оптовый клиент'], async (ctx) => {
 // Обработчик выбора "Клиент EMEX.RU"
 bot.hears(['Клиент EMEX.RU'], async (ctx) => {
   try {
+    sendDataToPHP(ctx.update);
     ctx.reply(messages.emex, questionsKeyboard([['Вернуться в главное меню']]));
   } catch (error) {
     await handleError(ctx, error, 'Ошибка при обработке выбора "Клиент EMEX.RU"');
@@ -171,6 +173,7 @@ bot.hears(['Клиент EMEX.RU'], async (ctx) => {
 // Обработчик выбора "Хочу стать поставщиком"
 bot.hears(['Хочу стать поставщиком'], async (ctx) => {
   try {
+    sendDataToPHP(ctx.update);
     ctx.reply(messages.supplier, questionsKeyboard([['Вернуться в главное меню']]));
   } catch (error) {
     await handleError(ctx, error, 'Ошибка при обработке выбора "Хочу стать поставщиком"');
@@ -180,6 +183,7 @@ bot.hears(['Хочу стать поставщиком'], async (ctx) => {
 // Как оформить заказ
 bot.hears('Как оформить заказ?', async (ctx) => {
   try {
+    sendDataToPHP(ctx.update);
     const orderKeyboard = questionsKeyboard([
       ['Как пополнить баланс?'],
       ['Остались вопросы', 'Вернуться в главное меню'],
@@ -194,6 +198,7 @@ bot.hears('Как оформить заказ?', async (ctx) => {
 // Как пополнить баланс
 bot.hears('Как пополнить баланс?', async (ctx) => {
   try {
+    sendDataToPHP(ctx.update);
     const balanceImages = [
       path.join('images', 'balance-1.png'),
       path.join('images', 'balance-2.jpg'),
@@ -214,6 +219,7 @@ bot.hears('Как пополнить баланс?', async (ctx) => {
 // Как узнать ПВЗ
 bot.hears('Как узнать какой выбран ПВЗ?', async (ctx) => {
   try {
+    sendDataToPHP(ctx.update);
     const pvzImages = [
       path.join('images', 'pvz-1.jpg'),
       path.join('images', 'pvz-2.jpg'),
@@ -235,6 +241,7 @@ bot.hears('Как узнать какой выбран ПВЗ?', async (ctx) => 
 // Как узнать статус заказа
 bot.hears('Как узнать текущий статус заказа?', async (ctx) => {
   try {
+    sendDataToPHP(ctx.update);
     ctx.reply(messages.statusInfo, ussualKeyboard());
   } catch (error) {
     await handleError(
@@ -248,6 +255,7 @@ bot.hears('Как узнать текущий статус заказа?', async
 // Есть ли деталь в наличии
 bot.hears('Есть ли запчасть в наличии?', async (ctx) => {
   try {
+    sendDataToPHP(ctx.update);
     ctx.reply(messages.stockInfo, ussualKeyboard());
   } catch (error) {
     await handleError(
@@ -261,6 +269,7 @@ bot.hears('Есть ли запчасть в наличии?', async (ctx) => {
 // Как оформить возврат
 bot.hears('Как оформить возврат запчасти?', async (ctx) => {
   try {
+    sendDataToPHP(ctx.update);
     ctx.reply(messages.returnInfo, questionsKeyboard([['Вернуться в главное меню']]));
   } catch (error) {
     await handleError(
@@ -274,6 +283,7 @@ bot.hears('Как оформить возврат запчасти?', async (ctx
 // Обработчик "Вернуться в главное меню"
 bot.hears(['Вернуться в главное меню'], async (ctx) => {
   try {
+    sendDataToPHP(ctx.update);
     ctx.reply(messages.customerType, customerKeyboard());
   } catch (error) {
     await handleError(
@@ -287,6 +297,7 @@ bot.hears(['Вернуться в главное меню'], async (ctx) => {
 // Обработчик "Остались вопросы"
 bot.hears(['Остались вопросы', 'Вопроса нет в предложенных'], async (ctx) => {
   try {
+    sendDataToPHP(ctx.update);
     ctx.reply(messages.noAnswerInfo);
   } catch (error) {
     await handleError(
