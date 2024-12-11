@@ -330,9 +330,13 @@ bot.on('photo', async (ctx) => {
     const photoId = ctx.message.photo[ctx.message.photo.length - 1].file_id;
     const photoData = await downloadFile(photoId);
 
+    const fileResponse = await axios.get(photoData.href, {
+      responseType: 'arraybuffer',
+    });
+
     await axios.post(
       'https://telegramwh.omnidesk.ru/webhooks/telegram/7037/de6bf551b7e2170e',
-      photoData,
+      fileResponse.data,
       {
         headers: { 'Content-Type': 'application/octet-stream' },
       },
@@ -343,13 +347,26 @@ bot.on('photo', async (ctx) => {
 });
 
 // Обработчик загрузки видео
-// bot.on('video', async (ctx) => {
-//   try {
-//     sendDataToPHP();
-//   } catch (error) {
-//     handleError(ctx, error, 'Ошибка отправки видео в чат');
-//   }
-// });
+bot.on('video', async (ctx) => {
+  try {
+    const videoId = ctx.message.video[ctx.message.video.length - 1].file_id;
+    const videoData = await downloadFile(videoId);
+
+    const fileResponse = await axios.get(videoData.href, {
+      responseType: 'arraybuffer',
+    });
+
+    await axios.post(
+      'https://telegramwh.omnidesk.ru/webhooks/telegram/7037/de6bf551b7e2170e',
+      fileResponse.data,
+      {
+        headers: { 'Content-Type': 'application/octet-stream' },
+      },
+    );
+  } catch (error) {
+    handleError(ctx, error, 'Ошибка отправки видео в чат');
+  }
+});
 
 // Глобальный обработчик ошибок
 bot.catch(async (err) => {
