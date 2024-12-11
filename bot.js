@@ -1,73 +1,10 @@
 const { Telegraf, Markup } = require('telegraf');
 const path = require('path');
-const fs = require('fs');
 const axios = require('axios');
 
 require('dotenv').config();
 
 const bot = new Telegraf(process.env.BOT_API_KEY);
-
-// Файл для записи данных
-const logFilePath = path.join(__dirname, 'user_interactions.json');
-
-// Проверка, существует ли файл, если нет, создаем его с пустым массивом
-if (!fs.existsSync(logFilePath)) {
-  try {
-    fs.writeFileSync(logFilePath, JSON.stringify([])); // Записываем пустой массив в файл
-  } catch (error) {
-    console.error('Ошибка при создании файла:', error);
-  }
-}
-
-// Функция для чтения данных из JSON-файла
-function readLogs() {
-  try {
-    const data = fs.readFileSync(logFilePath, 'utf-8');
-    if (!data.trim()) {
-      return []; // Возвращаем пустой массив, если данные пустые
-    }
-    return JSON.parse(data);
-  } catch (error) {
-    // Если файл пуст или поврежден, возвращаем пустой массив
-    console.error('Ошибка при чтении файла:', error);
-    return [];
-  }
-}
-
-// Функция для записи данных в JSON-файл
-function writeLogs(logs) {
-  try {
-    fs.writeFileSync(logFilePath, JSON.stringify(logs, null, 2));
-  } catch (error) {
-    console.error('Ошибка при записи в файл:', error);
-  }
-}
-
-// Функция для логирования действий пользователя
-function logUserAction(userId, action, message) {
-  const logs = readLogs();
-  const timestamp = new Date().toISOString();
-
-  let userLog = logs.find((log) => log.userId === userId);
-
-  if (!userLog) {
-    userLog = {
-      userId,
-      firstInteraction: timestamp,
-      actions: [],
-    };
-    logs.push(userLog);
-  }
-
-  userLog.actions.push({
-    action,
-    timestamp,
-    message,
-  });
-
-  // Записываем обновленные данные обратно в файл
-  writeLogs(logs);
-}
 
 // Функция для отправки данных в PHP-скрипт
 function sendDataToPHP(data) {
@@ -168,9 +105,6 @@ async function handleError(ctx, error, context = 'Произошла ошибк�
 bot.start(async (ctx) => {
   try {
     const userId = ctx.from.id;
-    const message = ctx.message.text;
-
-    logUserAction(userId, 'start', message);
 
     sendDataToPHP(ctx.update);
 
@@ -197,10 +131,6 @@ bot.start(async (ctx) => {
 // Обработчик выбора "Розничный клиент"
 bot.hears(['Розничный клиент'], async (ctx) => {
   try {
-    const userId = ctx.from.id;
-    const message = ctx.message.text;
-
-    logUserAction(userId, 'Розничный клиент', message);
     sendDataToPHP(ctx.update);
 
     const retailQuestions = questionsKeyboard([
@@ -218,9 +148,6 @@ bot.hears(['Розничный клиент'], async (ctx) => {
 // Обработчик выбора "Оптовый клиент"
 bot.hears(['Оптовый клиент'], async (ctx) => {
   try {
-    const userId = ctx.from.id;
-
-    logUserAction(userId, 'Оптовый клиент');
     const wholeQuestions = questionsKeyboard([
       ['Как оформить заказ?', 'Как пополнить баланс?'],
       ['Как узнать текущий статус заказа?', 'Как оформить возврат запчасти?'],
@@ -235,9 +162,6 @@ bot.hears(['Оптовый клиент'], async (ctx) => {
 // Обработчик выбора "Клиент EMEX.RU"
 bot.hears(['Клиент EMEX.RU'], async (ctx) => {
   try {
-    const userId = ctx.from.id;
-
-    logUserAction(userId, 'Клиент EMEX.RU');
     ctx.reply(messages.emex, questionsKeyboard([['Вернуться в главное меню']]));
   } catch (error) {
     await handleError(ctx, error, 'Ошибка при обработке выбора "Клиент EMEX.RU"');
@@ -247,9 +171,6 @@ bot.hears(['Клиент EMEX.RU'], async (ctx) => {
 // Обработчик выбора "Хочу стать поставщиком"
 bot.hears(['Хочу стать поставщиком'], async (ctx) => {
   try {
-    const userId = ctx.from.id;
-
-    logUserAction(userId, 'Хочу стать поставщиком');
     ctx.reply(messages.supplier, questionsKeyboard([['Вернуться в главное меню']]));
   } catch (error) {
     await handleError(ctx, error, 'Ошибка при обработке выбора "Хочу стать поставщиком"');
@@ -259,9 +180,6 @@ bot.hears(['Хочу стать поставщиком'], async (ctx) => {
 // Как оформить заказ
 bot.hears('Как оформить заказ?', async (ctx) => {
   try {
-    const userId = ctx.from.id;
-
-    logUserAction(userId, 'Как оформить заказ?');
     const orderKeyboard = questionsKeyboard([
       ['Как пополнить баланс?'],
       ['Остались вопросы', 'Вернуться в главное меню'],
@@ -276,9 +194,6 @@ bot.hears('Как оформить заказ?', async (ctx) => {
 // Как пополнить баланс
 bot.hears('Как пополнить баланс?', async (ctx) => {
   try {
-    const userId = ctx.from.id;
-
-    logUserAction(userId, 'Как пополнить баланс?');
     const balanceImages = [
       path.join('images', 'balance-1.png'),
       path.join('images', 'balance-2.jpg'),
@@ -299,9 +214,6 @@ bot.hears('Как пополнить баланс?', async (ctx) => {
 // Как узнать ПВЗ
 bot.hears('Как узнать какой выбран ПВЗ?', async (ctx) => {
   try {
-    const userId = ctx.from.id;
-
-    logUserAction(userId, 'Как узнать какой выбран ПВЗ?');
     const pvzImages = [
       path.join('images', 'pvz-1.jpg'),
       path.join('images', 'pvz-2.jpg'),
@@ -323,9 +235,6 @@ bot.hears('Как узнать какой выбран ПВЗ?', async (ctx) => 
 // Как узнать статус заказа
 bot.hears('Как узнать текущий статус заказа?', async (ctx) => {
   try {
-    const userId = ctx.from.id;
-
-    logUserAction(userId, 'Как узнать текущий статус заказа?');
     ctx.reply(messages.statusInfo, ussualKeyboard());
   } catch (error) {
     await handleError(
@@ -339,9 +248,6 @@ bot.hears('Как узнать текущий статус заказа?', async
 // Есть ли деталь в наличии
 bot.hears('Есть ли запчасть в наличии?', async (ctx) => {
   try {
-    const userId = ctx.from.id;
-
-    logUserAction(userId, 'Есть ли запчасть в наличии?');
     ctx.reply(messages.stockInfo, ussualKeyboard());
   } catch (error) {
     await handleError(
@@ -355,9 +261,6 @@ bot.hears('Есть ли запчасть в наличии?', async (ctx) => {
 // Как оформить возврат
 bot.hears('Как оформить возврат запчасти?', async (ctx) => {
   try {
-    const userId = ctx.from.id;
-
-    logUserAction(userId, 'Как оформить возврат запчасти?');
     ctx.reply(messages.returnInfo, questionsKeyboard([['Вернуться в главное меню']]));
   } catch (error) {
     await handleError(
@@ -371,9 +274,6 @@ bot.hears('Как оформить возврат запчасти?', async (ctx
 // Обработчик "Вернуться в главное меню"
 bot.hears(['Вернуться в главное меню'], async (ctx) => {
   try {
-    const userId = ctx.from.id;
-
-    logUserAction(userId, 'Вернуться в главное меню');
     ctx.reply(messages.customerType, customerKeyboard());
   } catch (error) {
     await handleError(
@@ -387,9 +287,6 @@ bot.hears(['Вернуться в главное меню'], async (ctx) => {
 // Обработчик "Остались вопросы"
 bot.hears(['Остались вопросы', 'Вопроса нет в предложенных'], async (ctx) => {
   try {
-    const userId = ctx.from.id;
-
-    logUserAction(userId, 'Остались вопросы, Вопроса нет в предложенных');
     ctx.reply(messages.noAnswerInfo);
   } catch (error) {
     await handleError(
