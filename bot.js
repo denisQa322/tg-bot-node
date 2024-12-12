@@ -21,7 +21,7 @@ async function sendErrorToAdmin(error) {
 // Функция для отправки данных в PHP-скрипт
 function sendDataToPHP(data) {
   axios
-    .post('https://telegramwh.omnidesk.ru/webhooks/telegram/7037/de6bf551b7e2170e', data)
+    .post('https://telegramwh.omnidesk.ru/webhooks/telegram/7042/8fcf89793acb6780', data)
     .then((response) => {
       console.log('Данные успешно отправлены в PHP:', response.data);
     })
