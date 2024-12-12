@@ -309,47 +309,11 @@ bot.hears(['Остались вопросы', 'Вопроса нет в пред
 });
 
 // Обработчик сообщений
-bot.on('text', (ctx) => {
+bot.on('message', (ctx) => {
   try {
     sendDataToPHP(ctx.update);
   } catch (error) {
     handleError(ctx, error, 'Ошибка отправки сообщения в чат');
-  }
-});
-
-// Обработчик загрузки фото
-bot.on('photo', async (ctx) => {
-  try {
-    const fileId = ctx.message.photo[ctx.message.photo.length - 1].file_id; // Получаем ID фото
-    const fileUrl = await bot.telegram.getFileLink(fileId); // Получаем ссылку на файл
-
-    const data = {
-      message: ctx.message.text || 'Фото отправлено',
-      photo_url: fileUrl.href, // Ссылка на фото
-      user: ctx.from, // Информация о пользователе
-    };
-
-    sendDataToPHP(data);
-  } catch (error) {
-    handleError(ctx, error, 'Ошибка отправки фото в чат');
-  }
-});
-
-// Обработчик загрузки видео
-bot.on('video', async (ctx) => {
-  try {
-    const fileId = ctx.message.video.file_id; // Получаем ID видео
-    const fileUrl = await bot.telegram.getFileLink(fileId); // Получаем ссылку на файл
-
-    const data = {
-      message: ctx.message.text || 'Видео отправлено',
-      video_url: fileUrl.href, // Ссылка на видео
-      user: ctx.from, // Информация о пользователе
-    };
-
-    sendDataToPHP(data);
-  } catch (error) {
-    handleError(ctx, error, 'Ошибка отправки видео в чат');
   }
 });
 
