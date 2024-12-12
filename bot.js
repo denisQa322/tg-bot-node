@@ -173,8 +173,21 @@ bot.hears(['Клиент EMEX.RU'], async (ctx) => {
 // Обработчик выбора "Хочу стать поставщиком"
 bot.hears(['Хочу стать поставщиком'], async (ctx) => {
   try {
+    // Отправляем информацию о событии в PHP
     sendDataToPHP(ctx.update);
-    ctx.reply(messages.supplier, questionsKeyboard([['Вернуться в главное меню']]));
+
+    // Формируем ответ бота
+    const replyMessage = messages.supplier;
+
+    // Отправляем ответ клиенту
+    await ctx.reply(replyMessage, questionsKeyboard([['Вернуться в главное меню']]));
+
+    // Отправляем текст ответа бота в PHP
+    sendDataToPHP({
+      bot_reply: replyMessage,
+      user_id: ctx.from.id,
+      timestamp: Date.now(),
+    });
   } catch (error) {
     await handleError(ctx, error, 'Ошибка при обработке выбора "Хочу стать поставщиком"');
   }
